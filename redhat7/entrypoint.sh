@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
   exit 0
 fi
 
-cpanm install $1
+cpanm $1
 
 cpantorpm \
   --packager centos \

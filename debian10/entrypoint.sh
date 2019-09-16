@@ -5,11 +5,11 @@ if [ -z "$1" ]; then
   exit 0
 fi
 
-cpanm install $1
+cpanm $1
 
 export DEB_BUILD_OPTIONS=nocheck
 
 dh-make-perl \
+  --version $2 \
   --build \
-  --cpan \
-  $1
+  --cpan $1
