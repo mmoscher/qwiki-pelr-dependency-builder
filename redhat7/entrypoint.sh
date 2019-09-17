@@ -1,13 +1,19 @@
 #!/bin/bash
 
-if [ -z "$1" ]; then
-  echo "CPAN Module name missing."
-  exit 0
-fi
-
 cpanm $1
 
-cpantorpm \
-  --packager centos \
-  --rpmbuild /opt/build \
-  $1
+cp /opt/rpmmacros /root/.rpmmacros
+
+rm -rf /opt/build/*
+
+mkdir -p /opt/build/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+
+cpanspec --follow $1
+
+sed -i '/%files/ a %define _unpackaged_files_terminate_build 0' /opt/build/*.spec
+
+mv /opt/build/*.spec SPECS
+
+mv /opt/build/*.tar.gz SOURCES
+
+rpmbuild -ba --nodeps /opt/build/SPECS/*.spec
