@@ -16,11 +16,11 @@ mkdir -p /opt/build/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 
 cp /opt/rpmmacros /root/.rpmmacros
 
-cpanm $fqn --installdeps
+cpanm $fqn
 
 find / -name $tarball | xargs cp -t /opt/build/SOURCES/
 
-cpanspec /opt/build/SOURCES/*.tar.gz
+cpanspec /opt/build/SOURCES/$tarball
 
 sed -i '/%files/ a /usr/*' /opt/build/*.spec
 

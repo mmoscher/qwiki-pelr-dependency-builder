@@ -13,7 +13,7 @@ package_folder=$(echo $tarball | sed 's/\(.*\)\.tar\.gz/\1/')
 
 rm -rf /opt/build/*
 
-cpanm $fqn --installdeps
+cpanm $fqn
 
 find / -name $tarball | xargs cp -t /opt/build/
 
