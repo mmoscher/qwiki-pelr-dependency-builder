@@ -5,15 +5,44 @@ build() {
     usage() {
         printf -v text "%s" \
             "build [OPTION...]\n" \
-            "    -d, --distro       specify distro pattern" \
-            "    -p, --package      cpan package to build\n" \
-            "    -v, --version      build specified Version. Defaults to latest\n" \
+            "    -d, --distro       specify distro pattern, e.g. \"deb\" would match debian8 and debian10\n" \
+            "    -p, --package      cpan package to build, e.g. JSON::XS\n" \
+            "    -v, --version      build the specified Version of the package. Defaults to latest\n" \
             "    -i, --images       only build the docker images\n" \
             "    -h, --help         shows this help message\n"
         printf "$text"
     }
 
+    filter-distros() {
+        if [ "$DISTRO" ]; then
+            for elem in "${distros[@]}"; do [[ $elem =~ $DISTRO ]] && with+=("$elem"); done
+        else
+            for elem in "${distros[@]}"; do with+=("$elem"); done
+        fi
+    }
+
+    check-params() {
+        if [ -z "$PACKAGE" ] && [ -z "$IMAGES" ]; then
+            echo "CPAN Module name missing."
+            exit 1
+        elif [ ${#with[@]} -eq 0 ]; then
+            echo "Distro pattern resulted in an empty list."
+            exit 1
+        fi
+    }
+
+    move-packages() {
+        mkdir -p ./builds/$distro
+        build_packages=$(find ./$distro/ -name "*.deb" -o -name "*.rpm")
+        if [[ "$build_packages" ]]; then
+            echo $build_packages | xargs cp -t ./builds/$distro/
+        else
+            echo "Could not find any packages."
+        fi
+    }
+
     IMAGES=false
+    distros=(debian8 debian10 redhat7)
 
     OPTS=`getopt -o d:p:v:ih --long distro:,package:,version:,images,help -- "$@"`
     if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
@@ -46,21 +75,9 @@ build() {
         esac
     done
 
-    distros=(debian8 debian10 redhat7)
+    filter-distros
 
-    if [ "$DISTRO" ]; then
-        for elem in "${distros[@]}"; do [[ $elem =~ $DISTRO ]] && with+=("$elem"); done
-    else
-        for elem in "${distros[@]}"; do with+=("$elem"); done
-    fi
-
-    if [ -z "$PACKAGE" ]; then
-        echo "CPAN Module name missing."
-        exit 1
-    elif [ ${#with[@]} -eq 0 ]; then
-        echo "Distro pattern resulted in an empty list."
-        exit 1
-    fi
+    check-params
 
     rm -rf ./builds/*
     echo "Using distros: ${with[@]}"
@@ -70,12 +87,10 @@ build() {
         docker build -t qwiki-$distro -f ./$distro/Dockerfile ./$distro
         if [[ "$IMAGES" = false ]]; then
             docker run -v $(pwd)/$distro/build:/opt/build -it --rm qwiki-$distro $PACKAGE $VERSION
-            mkdir -p ./builds/$distro
-            find ./$distro/ -name "*.deb" | xargs cp -t ./builds/$distro/
-            find ./$distro/ -name "*.rpm" | xargs cp -t ./builds/$distro/
+            move-packages
         fi
     done
-    echo "Done building packages. You can find them in the builds folder."
+    echo "Done building packages. You'll find them in the builds/ folder."
 }
 
 build $@
