@@ -20,10 +20,10 @@ cpanm $fqn --installdeps
 
 find / -name $tarball | xargs cp -t /opt/build/SOURCES/
 
-cpanspec --follow /opt/build/SOURCES/$tarball
+cpanspec /opt/build/SOURCES/*.tar.gz
 
 sed -i '/%files/ a /usr/*' /opt/build/*.spec
 
-mv /opt/build/*.spec SPECS
+mv /opt/build/*.spec SPECS/
 
 rpmbuild -ba --nodeps /opt/build/SPECS/*.spec

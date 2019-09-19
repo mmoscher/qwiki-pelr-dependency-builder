@@ -15,9 +15,9 @@ build() {
 
     filter-distros() {
         if [ "$DISTRO" ]; then
-            for elem in "${distros[@]}"; do [[ $elem =~ $DISTRO ]] && with+=("$elem"); done
+            for elem in "${distros[@]}"; do [[ $elem =~ $DISTRO ]] && with_distros+=("$elem"); done
         else
-            for elem in "${distros[@]}"; do with+=("$elem"); done
+            for elem in "${distros[@]}"; do with_distros+=("$elem"); done
         fi
     }
 
@@ -25,7 +25,7 @@ build() {
         if [ -z "$PACKAGE" ] && [ -z "$IMAGES" ]; then
             echo "CPAN Module name missing."
             exit 1
-        elif [ ${#with[@]} -eq 0 ]; then
+        elif [ ${#with_distros[@]} -eq 0 ]; then
             echo "Distro pattern resulted in an empty list."
             exit 1
         fi
@@ -33,7 +33,7 @@ build() {
 
     move-packages() {
         mkdir -p ./builds/$distro
-        build_packages=$(find ./$distro/ -name "*.deb" -o -name "*.rpm")
+        build_packages=$(find ./distros/$distro/ -name "*.deb" -o -name "*.rpm")
         if [[ "$build_packages" ]]; then
             echo $build_packages | xargs cp -t ./builds/$distro/
         else
@@ -80,13 +80,13 @@ build() {
     check-params
 
     rm -rf ./builds/*
-    echo "Using distros: ${with[@]}"
+    echo "Using distros: ${with_distros[@]}"
 
-    for distro in "${with[@]}"; do
+    for distro in "${with_distros[@]}"; do
         echo "Building for distro: $distro"
-        docker build -t qwiki-$distro -f ./$distro/Dockerfile ./$distro
+        docker build -t qwiki-$distro -f ./distros/$distro/Dockerfile ./distros/$distro
         if [[ "$IMAGES" = false ]]; then
-            docker run -v $(pwd)/$distro/build:/opt/build -it --rm qwiki-$distro $PACKAGE $VERSION
+            docker run -v $(pwd)/distros/$distro/build:/opt/build -it --rm qwiki-$distro $PACKAGE $VERSION
             move-packages
         fi
     done
