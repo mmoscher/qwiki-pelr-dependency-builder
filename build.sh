@@ -5,11 +5,11 @@ build() {
     usage() {
         printf -v text "%s" \
             "build [OPTION...]\n" \
-            "    -d, --distro       specify distro pattern, e.g. \"deb\" would match debian8 and debian10\n" \
-            "    -p, --package      cpan package to build, e.g. JSON::XS\n" \
-            "    -v, --version      build the specified Version of the package. Defaults to latest\n" \
-            "    -i, --images       only build the docker images\n" \
-            "    -h, --help         shows this help message\n"
+            "    -d, --distro           specify distro pattern, e.g. \"deb\" would match debian8 and debian10\n" \
+            "    -p, --package          cpan package to build, e.g. JSON::XS\n" \
+            "    -v, --version          build the specified Version of the package. Defaults to latest\n" \
+            "    -i, --image_build      only build the docker images\n" \
+            "    -h, --help             shows this help message\n"
         printf "$text"
     }
 
@@ -22,7 +22,7 @@ build() {
     }
 
     check-params() {
-        if [ -z "$PACKAGE" ] && [ -z "$IMAGES" ]; then
+        if [ -z "$PACKAGE" ] && [ -z "$IS_IMAGE_BUILD" ]; then
             echo "CPAN Module name missing."
             exit 1
         elif [ ${#with_distros[@]} -eq 0 ]; then
@@ -41,10 +41,10 @@ build() {
         fi
     }
 
-    IMAGES=false
+    IS_IMAGE_BUILD=0
     distros=(debian8 debian10 redhat7)
 
-    OPTS=`getopt -o d:p:v:ih --long distro:,package:,version:,images,help -- "$@"`
+    OPTS=`getopt -o d:p:v:ih --long distro:,package:,version:,image_build,help -- "$@"`
     if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 
     eval set -- "$OPTS"
@@ -60,8 +60,8 @@ build() {
             -v | --version )
                 VERSION=$2
                 shift 2 ;;
-            -i | --images )
-                IMAGES=true
+            -i | --image_build )
+                IS_IMAGE_BUILD=1
                 shift ;;
             -h | --help )
                 usage
@@ -85,7 +85,7 @@ build() {
     for distro in "${with_distros[@]}"; do
         echo "Building for distro: $distro"
         docker build -t qwiki-$distro -f ./distros/$distro/Dockerfile ./distros/$distro
-        if [[ "$IMAGES" = false ]]; then
+        if [[ "$IS_IMAGE_BUILD" = 0 ]]; then
             docker run -v $(pwd)/distros/$distro/build:/opt/build -it --rm qwiki-$distro $PACKAGE $VERSION
             move-packages
         fi
