@@ -32,10 +32,10 @@ build() {
     }
 
     move-packages() {
-        mkdir -p ./builds/$distro
-        build_packages=$(find ./distros/$distro/ -name "*.deb" -o -name "*.rpm")
+        mkdir -p ./builds/$distro_basename/$distro_version
+        build_packages=$(find ./distros/$distro_basename/$distro_version/ -name "*.deb" -o -name "*.rpm")
         if [[ "$build_packages" ]]; then
-            echo $build_packages | xargs cp -t ./builds/$distro/
+            echo $build_packages | xargs cp -t ./builds/$distro_basename/$distro_version/
         else
             echo "Could not find any packages."
         fi
@@ -84,9 +84,10 @@ build() {
 
     for distro in "${with_distros[@]}"; do
         echo "Building for distro: $distro"
-        docker build -t qwiki-$distro -f ./distros/$distro/Dockerfile ./distros/$distro
+        [[ $distro =~ ^([a-z]+)([0-9]+)$ ]] && distro_basename="${BASH_REMATCH[1]}" && distro_version="${BASH_REMATCH[2]}"
+        docker build -t qwiki-$distro_basename-$distro_version -f ./distros/$distro_basename/$distro_version/Dockerfile ./distros/$distro_basename
         if [[ "$IS_IMAGE_BUILD" = 0 ]]; then
-            docker run -v $(pwd)/distros/$distro/build:/opt/build -it --rm qwiki-$distro $PACKAGE $VERSION
+            docker run -v $(pwd)/distros/$distro_basename/$distro_version/build:/opt/build -it --rm qwiki-$distro_basename-$distro_version $PACKAGE $VERSION
             move-packages
         fi
     done
