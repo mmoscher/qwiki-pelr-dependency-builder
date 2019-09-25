@@ -1,0 +1,5 @@
+%packager centos
+
+%vendor Modell Aachen
+
+%_topdir /opt/build
