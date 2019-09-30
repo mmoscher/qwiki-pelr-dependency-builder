@@ -22,7 +22,7 @@ $ ./build.sh -p Data::Pageset
 ```
 
 * Creates an rpm and deb package to install the Perl Lib `Data::Pageset` (latest) on RedHat7, Debian8,
-Debian10 and Debian10.
+Debian9 and Debian10.
 
 ```
 $ ./build.sh -p JSON::XS -d debian10 -v 4.0
