@@ -38,6 +38,7 @@ build() {
             echo $build_packages | xargs cp -t ./builds/$distro_basename/$distro_version/
         else
             echo "Could not find any packages."
+            exit 1
         fi
     }
 
