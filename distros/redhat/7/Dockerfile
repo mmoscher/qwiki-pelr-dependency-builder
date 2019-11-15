@@ -13,7 +13,7 @@ RUN yum -y install \
   rpm-build \
   cpanspec
 
-RUN  yum -y install cpanm gcc perl perl-App-cpanminus perl-Config-Tiny
+RUN  yum -y install cpanm gcc perl perl-App-cpanminus perl-Config-Tiny postgresql-libs postgresql-devel
 
 WORKDIR /opt/build
 

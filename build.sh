@@ -88,11 +88,10 @@ build() {
                 echo "Successfully cleaned all existing build artifacts."
                 return ;;
             * )
-                echo "Unknown Subcommand"
-                usage
-                return ;;
+                break ;;
         esac
     done
+    
 
     filter-distros
 
