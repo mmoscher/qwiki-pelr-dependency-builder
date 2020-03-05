@@ -4,7 +4,10 @@ build() {
 
     usage() {
         printf -v text "%s" \
-            "build [OPTION...]\n" \
+            "build [COMMAND] [OPTION...]\n" \
+            "  COMMANDS:\n" \
+            "    clean                  clean all existing build artifacts\n\n" \
+            "  OPTIONS:\n" \
             "    -d, --distro           specify distro pattern, e.g. \"deb\" would match debian8 and debian10\n" \
             "    -p, --package          cpan package to build, e.g. JSON::XS\n" \
             "    -v, --version          build the specified Version of the package. Defaults to latest\n" \
@@ -76,11 +79,24 @@ build() {
         esac
     done
 
+    shift $(expr $OPTIND - 1 )
+
+    while true; do
+        case "$1" in
+            clean )
+                rm -rf ./builds/*;
+                echo "Successfully cleaned all existing build artifacts."
+                return ;;
+            * )
+                break ;;
+        esac
+    done
+    
+
     filter-distros
 
     check-params
 
-    rm -rf ./builds/*
     echo "Using distros: ${with_distros[@]}"
 
     for distro in "${with_distros[@]}"; do
