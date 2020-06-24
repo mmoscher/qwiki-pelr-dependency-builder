@@ -42,6 +42,10 @@ build() {
         fi
     }
 
+    # install-signing-key() {
+    #     mkdir "./distros/"
+    # }
+
     IS_DOCKER_IMAGE=0
     distros=(debian8 debian9 debian10 redhat7)
 
@@ -75,6 +79,8 @@ build() {
                 break ;;
         esac
     done
+
+   # install-signing-key
 
     filter-distros
 

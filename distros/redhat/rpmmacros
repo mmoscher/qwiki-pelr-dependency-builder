@@ -1,5 +1,7 @@
 %packager centos
 
-%vendor Modell Aachen
+%vendor Modell Aachen GmbH
+%_signature gpg
+%_gpg_name Modell Aachen GmbH <support@modell-aachen.de>
 
 %_topdir /opt/build
