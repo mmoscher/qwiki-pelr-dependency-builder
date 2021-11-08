@@ -22,8 +22,15 @@ find / -name $tarball | xargs cp -t /opt/build/SOURCES/
 
 cpanspec /opt/build/SOURCES/$tarball
 
+
 sed -i '/%files/ a /usr/*' /opt/build/*.spec
+sed -i '/%files/ a %exclude %dir /usr' /opt/build/*.spec
+sed -i '/%files/ a %exclude %dir /usr/bin' /opt/build/*.spec
+sed -i '/%files/ a %exclude %dir /usr/lib' /opt/build/*.spec
+sed -i '/%files/ a %exclude %dir /usr/lib64' /opt/build/*.spec
+
 
 mv /opt/build/*.spec SPECS/
+
 
 rpmbuild -ba --nodeps /opt/build/SPECS/*.spec
